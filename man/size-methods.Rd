@@ -4,7 +4,9 @@
 \name{size}
 \alias{size}
 \alias{size,fibonacci_heap-method}
+\alias{size,binomial_heap-method}
 \alias{size,hashmap-method}
+\alias{size,bimap-method}
 \alias{size,queue-method}
 \alias{size,stack-method}
 \title{Get the size of an object}
@@ -13,7 +15,11 @@ size(obj)
 
 \S4method{size}{fibonacci_heap}(obj)
 
+\S4method{size}{binomial_heap}(obj)
+
 \S4method{size}{hashmap}(obj)
+
+\S4method{size}{bimap}(obj)
 
 \S4method{size}{queue}(obj)
 
@@ -23,7 +29,7 @@ size(obj)
 \item{obj}{the object to get the size from}
 }
 \value{
-returns the size of an object
+returns the size of \code{obj}
 }
 \description{
 Computes the size of an object, i.e. the number of keys or

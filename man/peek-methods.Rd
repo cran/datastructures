@@ -4,25 +4,28 @@
 \name{peek}
 \alias{peek}
 \alias{peek,fibonacci_heap-method}
-\alias{peek,queue-method}
+\alias{peek,binomial_heap-method}
 \alias{peek,stack-method}
+\alias{peek,queue-method}
 \title{Have a look at the first element from an object without removing it}
 \usage{
 peek(obj)
 
 \S4method{peek}{fibonacci_heap}(obj)
 
-\S4method{peek}{queue}(obj)
+\S4method{peek}{binomial_heap}(obj)
 
 \S4method{peek}{stack}(obj)
+
+\S4method{peek}{queue}(obj)
 }
 \arguments{
 \item{obj}{the object to peek}
 }
 \value{
-returns the first element from \code{obj}
+returns the first element from \code{obj} as list
 }
 \description{
 Peeks into an object, i.e. takes the first element and returns
- it without removing it from the object,
+ it without removing it from the object.
 }

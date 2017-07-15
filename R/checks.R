@@ -22,15 +22,15 @@
 .check.key.value.classes <- function(obj, x, y)
 {
     .check.key.class(obj, x)
-    vc <- obj@.data$value.class
+    vc <- obj@.value.class
     if (any(is.null(c(x, y)))) stop("x/y cannot be NULL")
     if (class(y) != vc)        stop(paste("class(y) is not", vc))
 }
 
 #' @noRd
-.check.key.class <- function(obj, x)
+.check.key.class <- function(obj, x, kc=obj@.key.class)
 {
-    kc <- obj@.data$key.class
-    if (any(is.na(x)))         stop("x cannot be NA")
-    if (class(x) != kc)        stop(paste("class(x) is not", kc))
+    if (any(is.null(x))) stop("x/y cannot be NULL")
+    if (any(is.na(x)))  stop("x cannot be NA")
+    if (class(x) != kc) stop(paste("class(x) is not", kc))
 }

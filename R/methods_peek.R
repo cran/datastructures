@@ -21,7 +21,7 @@
 #' @title Have a look at the first element from an object without removing it
 #'
 #' @description Peeks into an object, i.e. takes the first element and returns
-#'  it without removing it from the object,
+#'  it without removing it from the object.
 #'
 #' @export
 #' @docType methods
@@ -29,7 +29,8 @@
 #'
 #' @param obj  the object to peek
 #'
-#' @return  returns the first element from \code{obj}
+#' @return  returns the first element from \code{obj} as list
+#'
 setGeneric(
     "peek",
     function(obj)
@@ -39,41 +40,38 @@ setGeneric(
     package = "datastructures"
 )
 
-#' @rdname peek-methods
-setMethod(
-    "peek",
-    signature = signature(obj = "fibonacci_heap"),
-    function(obj)
-    {
-        if (obj@.data$heap$size())
-            obj@.data$heap$peek()
-        else
-            NULL
-    }
-)
+
+#' @noRd
+.peek.heap <- function(obj)
+{
+    if (obj@.heap$size())
+        obj@.heap$peek()
+    else
+        NULL
+}
+
 
 #' @rdname peek-methods
-setMethod(
-    "peek",
-    signature = signature(obj = "queue"),
-    function(obj)
-    {
-        if (obj@.data$list$size())
-            obj@.data$list$peek()
-        else
-            NULL
-    }
-)
+setMethod("peek", "fibonacci_heap", .peek.heap)
+
 
 #' @rdname peek-methods
-setMethod(
-    "peek",
-    signature = signature(obj = "stack"),
-    function(obj)
-    {
-        if (obj@.data$list$size())
-            obj@.data$list$peek()
-        else
-            NULL
-    }
-)
+setMethod("peek", "binomial_heap", .peek.heap)
+
+
+#' @noRd
+.peek.deque <- function(obj)
+{
+    if (obj@.deque$size())
+        obj@.deque$peek()
+    else
+        NULL
+}
+
+
+#' @rdname peek-methods
+setMethod("peek", "stack", .peek.deque)
+
+
+#' @rdname peek-methods
+setMethod("peek", "queue", .peek.deque)

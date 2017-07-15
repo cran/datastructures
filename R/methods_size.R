@@ -18,12 +18,6 @@
 # along with datastructures. If not, see <http://www.gnu.org/licenses/>.
 
 
-#' @include ds_fibonacci_heap.R
-#' @include ds_hashmap.R
-#' @include ds_stack.R
-#' @include ds_queue.R
-
-
 #' @title Get the size of an object
 #'
 #' @description Computes the size of an object, i.e. the number of keys or
@@ -34,7 +28,7 @@
 #' @rdname size-methods
 #'
 #' @param obj  the object to get the size from
-#' @return  returns the size of an object
+#' @return  returns the size of \code{obj}
 #'
 setGeneric(
     "size",
@@ -45,42 +39,47 @@ setGeneric(
     package = "datastructures"
 )
 
-#' @rdname size-methods
-setMethod(
-    "size",
-    "fibonacci_heap",
-    function(obj)
-    {
-        obj@.data$heap$size()
-    }
-)
+
+#' @noRd
+.size.heap <-  function(obj)
+{
+    obj@.heap$size()
+}
+
 
 #' @rdname size-methods
-setMethod(
-    "size",
-    "hashmap",
-    function(obj)
-    {
-        obj@.data$map$size()
-    }
-)
+setMethod("size", "fibonacci_heap", .size.heap)
+
 
 #' @rdname size-methods
-setMethod(
-    "size",
-    "queue",
-    function(obj)
-    {
-        obj@.data$list$size()
-    }
-)
+setMethod("size", "binomial_heap", .size.heap)
+
+
+#' @noRd
+.size.map <- function(obj)
+{
+    obj@.map$size()
+}
+
 
 #' @rdname size-methods
-setMethod(
-    "size",
-    "stack",
-    function(obj)
-    {
-        obj@.data$list$size()
-    }
-)
+setMethod("size", "hashmap", .size.map)
+
+
+#' @rdname size-methods
+setMethod("size", "bimap", .size.map)
+
+
+#' @noRd
+.size.deque <-  function(obj)
+{
+    obj@.deque$size()
+}
+
+
+#' @rdname size-methods
+setMethod("size", "queue", .size.deque)
+
+
+#' @rdname size-methods
+setMethod("size", "stack", .size.deque)

@@ -8,7 +8,7 @@
 \S4method{[}{fibonacci_heap,ANY,missing}(x, i) <- value
 }
 \arguments{
-\item{x}{a \code{fionacci_heap}}
+\item{x}{a \code{heap}}
 
 \item{i}{a vector of keys}
 

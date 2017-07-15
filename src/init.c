@@ -26,16 +26,26 @@
 #include <stdlib.h>
 #include <R_ext/Rdynload.h>
 
+extern SEXP _rcpp_module_boot_bimap_module();
 extern SEXP _rcpp_module_boot_hashmap_module();
+
+extern SEXP _rcpp_module_boot_binomial_heap_module();
 extern SEXP _rcpp_module_boot_fibonacci_heap_module();
+
 extern SEXP _rcpp_module_boot_queue_module();
 extern SEXP _rcpp_module_boot_stack_module();
 
 static const R_CallMethodDef CallEntries[] = {
     {"_rcpp_module_boot_hashmap_module",
      (DL_FUNC) &_rcpp_module_boot_hashmap_module, 0},
+     {"_rcpp_module_boot_bimap_module",
+      (DL_FUNC) &_rcpp_module_boot_bimap_module, 0},
+
+    {"_rcpp_module_boot_binomial_heap_module",
+     (DL_FUNC) &_rcpp_module_boot_binomial_heap_module, 0},
     {"_rcpp_module_boot_fibonacci_heap_module",
      (DL_FUNC) &_rcpp_module_boot_fibonacci_heap_module, 0},
+
     {"_rcpp_module_boot_queue_module",
      (DL_FUNC) &_rcpp_module_boot_queue_module, 0},
     {"_rcpp_module_boot_stack_module",
@@ -43,7 +53,7 @@ static const R_CallMethodDef CallEntries[] = {
     {NULL, NULL, 0}
 };
 
-void R_init_RcppAnnoy(DllInfo *dll) {
+void R_init_datastructures(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }

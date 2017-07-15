@@ -8,7 +8,7 @@
 \S4method{[}{hashmap,ANY,missing}(x, i) <- value
 }
 \arguments{
-\item{x}{a \code{hashmap}}
+\item{x}{a \code{map} object}
 
 \item{i}{a vector of keys}
 

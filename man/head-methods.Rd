@@ -3,10 +3,13 @@
 \docType{methods}
 \name{head}
 \alias{head}
+\alias{head,bimap-method}
 \alias{head,hashmap-method}
 \title{Get the first elements from an object}
 \usage{
 head(obj)
+
+\S4method{head}{bimap}(obj)
 
 \S4method{head}{hashmap}(obj)
 }
@@ -14,7 +17,7 @@ head(obj)
 \item{obj}{the object to get the head from}
 }
 \value{
-returns a list of elements
+returns a list of elements from \code{obj}
 }
 \description{
 Extracts the first couple of entries from an object.

@@ -27,7 +27,9 @@
 #' @rdname pop-methods
 #'
 #' @param obj  the object to pop an element from
-#' @return  returns the first element from  \code{obj}
+
+#' @return  returns the first element from \code{obj} as list
+#'
 setGeneric(
     "pop",
     function(obj)
@@ -37,43 +39,38 @@ setGeneric(
     package = "datastructures"
 )
 
-#' @rdname pop-methods
-setMethod(
-    "pop",
-    signature = signature(obj = "queue"),
-    function(obj)
-    {
-        if (obj@.data$list$size())
-            obj@.data$list$pop()
-        else
-            NULL
-    }
-)
 
-#' @rdname pop-methods
-setMethod(
-    "pop",
-    signature = signature(obj = "fibonacci_heap"),
-    function(obj)
-    {
-        if (obj@.data$heap$size())
-            obj@.data$heap$pop()
-        else
-            NULL
-    }
-)
+#' @noRd
+.pop.deque <-  function(obj)
+{
+    if (obj@.deque$size())
+        obj@.deque$pop()
+    else
+        NULL
+}
 
 
 #' @rdname pop-methods
-setMethod(
-    "pop",
-    signature = signature(obj = "stack"),
-    function(obj)
-    {
-        if (obj@.data$list$size())
-            obj@.data$list$pop()
-        else
-            NULL
-    }
-)
+setMethod("pop", "stack", .pop.deque)
 
+
+#' @rdname pop-methods
+setMethod("pop", "queue", .pop.deque)
+
+
+#' @noRd
+.pop.heap <- function(obj)
+{
+    if (obj@.heap$size())
+        obj@.heap$pop()
+    else
+        NULL
+}
+
+
+#' @rdname pop-methods
+setMethod("pop", "fibonacci_heap", .pop.heap)
+
+
+#' @rdname pop-methods
+setMethod("pop", "binomial_heap", .pop.heap)

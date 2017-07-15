@@ -18,49 +18,55 @@
 # along with datastructures. If not, see <http://www.gnu.org/licenses/>.
 
 
+#' @include ds_deque.R
+NULL
+
+
 #' @title Stack class
 #'
 #' @export
 #' @name stack-class
 #' @rdname stack-class
 #'
-#' @description Implementation of a stack datastructure, i.e. a list
+#' @description Implementation of a stack data structure, i.e. a list
 #'  implementation with LIFO principle. \code{stack} uses a \code{std::deque}
 #'  as default container, so inserting, peeking and popping functions require
-#'  constant \emph{O(1)}.
+#'  constant \emph{O(1)}. See \code{\linkS4class{queue}} for a class using
+#'  the FIFO principle.
 #'
-#' @slot .data  object that bundles all important heap related objects
-setClass(
-    "stack",
-    slots = list(.data = "list"),
-    prototype = prototype(.data = NULL)
-)
+#' @slot .deque  \code{C++} object representing a deque
+#' @slot .key.class  the class of the keys
+#'
+setClass("stack", contains="deque")
 
-#' @noRd
+
+#' @title Create a new \code{stack}
+#'
+#' @export
 #' @importFrom methods new
-setMethod(
-    "initialize",
-    "stack",
-    function(.Object,
-             key.class   = c("character", "numeric", "integer"))
+#'
+#' @description Instantiates a new \code{\linkS4class{stack}} object,
+#'  i.e. a list implementation with LIFO principle.
+#'
+#' @param key.class  the primitive class type of the keys
+#'
+#' @return returns a new \code{stack} object
+#'
+stack <- function(key.class = c("character", "numeric", "integer"))
+{
+    key.class <- match.arg(key.class)
+    if (key.class == "character")
     {
-        key.class   <- match.arg(key.class)
-        .Object@.data <- list(key.class   = key.class)
-
-        if (key.class == "character")
-        {
-            stack <- methods::new(stack_s)
-        }
-        else if (key.class == "numeric")
-        {
-            stack <- methods::new(stack_d)
-        }
-        else
-        {
-            stack <- methods::new(stack_i)
-        }
-
-        .Object@.data$list <- stack
-        .Object
+        stack <- methods::new(stack_s)
     }
-)
+    else if (key.class == "numeric")
+    {
+        stack <- methods::new(stack_d)
+    }
+    else
+    {
+        stack <- methods::new(stack_i)
+    }
+
+    methods::new("stack", .key.class=key.class, .deque=stack)
+}

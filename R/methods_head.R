@@ -18,7 +18,6 @@
 # along with datastructures. If not, see <http://www.gnu.org/licenses/>.
 
 
-
 #' @title Get the first elements from an object
 #'
 #' @description Extracts the first couple of entries from an object.
@@ -28,7 +27,9 @@
 #' @rdname head-methods
 #'
 #' @param obj  the object to get the head from
-#' @return  returns a list of elements
+#'
+#' @return  returns a list of elements from \code{obj}
+#'
 setGeneric(
     "head",
     function(obj)
@@ -38,16 +39,19 @@ setGeneric(
     package = "datastructures"
 )
 
-#' @rdname head-methods
-setMethod(
-    "head",
-    "hashmap",
-    function(obj)
-    {
-        if (obj@.data$map$size())
-            unlist(obj@.data$map$head())
-        else
-            NULL
-    }
-)
+#' @noRd
+.head.map <- function(obj)
+{
+    if (obj@.map$size())
+        obj@.map$head()
+    else
+        NULL
+}
 
+
+#' @rdname head-methods
+setMethod("head", "bimap", .head.map)
+
+
+#' @rdname head-methods
+setMethod("head", "hashmap", .head.map)

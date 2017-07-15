@@ -3,24 +3,27 @@
 \docType{methods}
 \name{pop}
 \alias{pop}
+\alias{pop,stack-method}
 \alias{pop,queue-method}
 \alias{pop,fibonacci_heap-method}
-\alias{pop,stack-method}
+\alias{pop,binomial_heap-method}
 \title{Pop a single element from an object}
 \usage{
 pop(obj)
+
+\S4method{pop}{stack}(obj)
 
 \S4method{pop}{queue}(obj)
 
 \S4method{pop}{fibonacci_heap}(obj)
 
-\S4method{pop}{stack}(obj)
+\S4method{pop}{binomial_heap}(obj)
 }
 \arguments{
 \item{obj}{the object to pop an element from}
 }
 \value{
-returns the first element from  \code{obj}
+returns the first element from \code{obj} as list
 }
 \description{
 Remove and return the first element from an object.

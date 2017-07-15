@@ -18,49 +18,55 @@
 # along with datastructures. If not, see <http://www.gnu.org/licenses/>.
 
 
+#' @include ds_deque.R
+NULL
+
+
 #' @title Queue class
 #'
 #' @export
 #' @name queue-class
 #' @rdname queue-class
 #'
-#' @description Implementation of a queue datastructure, i.e. a list
+#' @description Implementation of a queue data structure, i.e. a list
 #'  implementation with FIFO principle. \code{queue} uses a \code{std::deque}
 #'  as default container, so inserting, peeking and popping functions require
-#'  constant \emph{O(1)}.
+#'  constant \emph{O(1)}. See \code{\linkS4class{stack}} for a class using
+#'  the LIFO principle.
 #'
-#' @slot .data  object that bundles all important heap related objects
-setClass(
-    "queue",
-    slots = list(.data = "list"),
-    prototype = prototype(.data = NULL)
-)
+#' @slot .deque  \code{C++} object representing a deque
+#' @slot .key.class  the class of the keys
+#'
+setClass("queue", contains="deque")
 
-#' @noRd
+
+#' @title Create a new \code{queue}
+#'
+#' @export
 #' @importFrom methods new
-setMethod(
-    "initialize",
-    "queue",
-    function(.Object,
-             key.class   = c("character", "numeric", "integer"))
+#'
+#' @description Instantiates a new \code{\linkS4class{queue}} object,
+#'  i.e. a list implementation with FIFO principle.
+#'
+#' @param key.class  the primitive class type of the keys
+#'
+#' @return returns a new \code{queue} object
+#'
+queue <- function(key.class = c("character", "numeric", "integer"))
+{
+    key.class <- match.arg(key.class)
+    if (key.class == "character")
     {
-        key.class   <- match.arg(key.class)
-        .Object@.data <- list(key.class   = key.class)
-
-        if (key.class == "character")
-        {
-            queue <- methods::new(queue_s)
-        }
-        else if (key.class == "numeric")
-        {
-            queue <- methods::new(queue_d)
-        }
-        else
-        {
-            queue <- methods::new(queue_i)
-        }
-
-        .Object@.data$list <- queue
-        .Object
+        queue <- methods::new(queue_s)
     }
-)
+    else if (key.class == "numeric")
+    {
+        queue <- methods::new(queue_d)
+    }
+    else
+    {
+        queue <- methods::new(queue_i)
+    }
+
+    methods::new("queue", .key.class=key.class, .deque=queue)
+}
