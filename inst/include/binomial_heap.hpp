@@ -23,30 +23,14 @@
 #ifndef DS_BINOMIALHEAP
 #define DS_BINOMIALHEAP
 
+
 #include <Rcpp.h>
 #include <vector>
 #include <string>
 #include <map>
 #include <boost/heap/binomial_heap.hpp>
 
-template <typename T, typename U>
-struct node
-{
-    T key_;
-    U value_;
-
-    node(T key, U value) : key_(key), value_(value)
-    {}
-};
-
-template <typename T, typename U>
-struct compare_node
-{
-    bool operator()(const node<T, U>& lhs, const node<T, U>& rhs) const
-    {
-        return lhs.key_ > rhs.key_;
-    }
-};
+#include <node.hpp>
 
 
 template <typename T, typename U>
@@ -56,7 +40,7 @@ public:
     binomial_heap(): heap_()
     {}
 
-    void insert(std::vector<T>& t, std::vector<U>& u)
+    void insert(std::vector<T>& t, std::vector< std::vector<U> >& u)
     {
         if (t.size() != u.size())
         {
@@ -67,6 +51,7 @@ public:
             heap_.push(node<T, U>(t[i], u[i]));
         }
     }
+
 
     void clear()
     {
@@ -88,8 +73,8 @@ public:
         node<T, U> n = heap_.top();
         heap_.pop();
 
-        std::map< T, U > heads;
-        heads.insert(std::pair<T, U>(n.key_, n.value_));
+        std::map< T, std::vector<U> > heads;
+        heads.insert(std::pair<T, std::vector<U>>(n.key_, n.value_));
 
         return Rcpp::wrap(heads);
     }
@@ -98,8 +83,8 @@ public:
     {
         node<T, U> n = heap_.top();
 
-        std::map< T, U > heads;
-        heads.insert(std::pair<T, U>(n.key_, n.value_));
+        std::map< T, std::vector<U> > heads;
+        heads.insert(std::pair<T, std::vector<U>>(n.key_, n.value_));
 
         return Rcpp::wrap(heads);
     }

@@ -25,12 +25,12 @@
 
 RCPP_MODULE(binomial_heap_module) {
     Rcpp::class_< binomial_heap_ss >( "binomial_heap_ss" )
-        .constructor()
-        .method("peek",   &binomial_heap_ss::peek)
-        .method("pop",    &binomial_heap_ss::pop)
-        .method("size",   &binomial_heap_ss::size)
-        .method("insert", &binomial_heap_ss::insert)
-        .method("clear",  &binomial_heap_ss::clear);
+    .constructor()
+    .method("peek",   &binomial_heap_ss::peek)
+    .method("pop",    &binomial_heap_ss::pop)
+    .method("size",   &binomial_heap_ss::size)
+    .method("insert", &binomial_heap_ss::insert)
+    .method("clear",  &binomial_heap_ss::clear);
     Rcpp::class_< binomial_heap_sd >( "binomial_heap_sd" )
         .constructor()
         .method("peek",   &binomial_heap_sd::peek)
@@ -67,7 +67,6 @@ RCPP_MODULE(binomial_heap_module) {
         .method("size",   &binomial_heap_di::size)
         .method("insert", &binomial_heap_di::insert)
         .method("clear",  &binomial_heap_di::clear);
-
     Rcpp::class_< binomial_heap_id >( "binomial_heap_id" )
         .constructor()
         .method("peek",   &binomial_heap_id::peek)

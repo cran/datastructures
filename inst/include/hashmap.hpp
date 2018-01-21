@@ -20,6 +20,7 @@
 *
 */
 
+
 #ifndef DS_HASHMAP
 #define DS_HASHMAP
 
@@ -28,6 +29,7 @@
 #include <string>
 #include <map>
 #include <unordered_map>
+
 
 template <typename T, typename U>
 class hashmap
@@ -41,7 +43,7 @@ public:
         return map_.size();
     }
 
-    void insert(std::vector<T>& t, std::vector<U>& u)
+    void insert(std::vector<T>& t, std::vector< std::vector<U> >& u)
     {
         if (t.size() != u.size())
         {
@@ -49,7 +51,7 @@ public:
         }
         for (typename std::vector<T>::size_type i = 0; i < t.size(); ++i)
         {
-            map_.insert(std::pair<T, U>(t[i], u[i]));
+            map_.insert(std::pair<T, std::vector<U>>(t[i], u[i]));
         }
     }
 
@@ -65,22 +67,22 @@ public:
         return keys;
     }
 
-    std::vector<U> values()
+    Rcpp::List values()
     {
-        std::vector<U> values;
+        std::vector< std::vector<U> > values;
         values.reserve(map_.size());
         for(const auto& pair : map_)
         {
             values.push_back(pair.second);
         }
 
-        return values;
+        return Rcpp::wrap(values);
     }
 
     Rcpp::List head()
     {
         unsigned int i = 0;
-        std::map< T, U > heads;
+        std::map< T, std::vector<U> > heads;
         for (const auto& pair : map_)
         {
             if (i++ == 5) break;
@@ -90,9 +92,9 @@ public:
         return Rcpp::wrap(heads);
     }
 
-    std::vector<U> get(std::vector<T>& t)
+    Rcpp::List get(std::vector<T>& t)
     {
-        std::vector<U> values(t.size());
+        std::vector< std::vector<U> > values(t.size());
         for (typename std::vector<T>::size_type i = 0; i < t.size(); ++i)
         {
             T key = t[i];
@@ -108,12 +110,12 @@ public:
             }
         }
 
-        return values;
+        return Rcpp::wrap(values);
     }
 
 
 private:
-    std::unordered_map<T, U> map_;
+    std::unordered_map<T, std::vector<U>> map_;
 };
 
 typedef hashmap<std::string, std::string> hashmap_ss;

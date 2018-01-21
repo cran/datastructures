@@ -20,51 +20,28 @@
  *
  */
 
+#ifndef DS_NODE
+#define DS_NODE
 
-#ifndef DS_STACK
-#define DS_STACK
+#include <vector>
 
-#include <Rcpp.h>
-#include <stack>
-#include <string>
-
-
-template <typename T>
-class stack
+template <typename T, typename U>
+struct node
 {
-public:
-    stack(): stack_()
+    T key_;
+    std::vector<U> value_;
+
+    node(T key, std::vector<U> value) : key_(key), value_(value)
     {}
-
-    size_t size()
-    {
-        return stack_.size();
-    }
-
-    void insert(std::vector< std::vector<T> >& t)
-    {
-        for (typename std::vector<T>::size_type i = 0; i < t.size(); ++i)
-            stack_.push(t[i]);
-    }
-
-    std::vector<T> peek()
-    {
-        return stack_.top();
-    }
-
-    std::vector<T> pop()
-    {
-        std::vector<T> t = peek();
-        stack_.pop();
-        return t;
-    }
-
-private:
-    std::stack< std::vector<T> > stack_;
 };
 
-typedef stack<std::string> stack_s;
-typedef stack<double>      stack_d;
-typedef stack<int>         stack_i;
+template <typename T, typename U>
+struct compare_node
+{
+    bool operator()(const node<T, U>& lhs, const node<T, U>& rhs) const
+    {
+        return lhs.key_ > rhs.key_;
+    }
+};
 
 #endif

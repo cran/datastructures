@@ -1,21 +1,13 @@
-# datastructures: Implementation of core datastructures for R.
-#
-# Copyright (C) Simon Dirmeier
-#
-# This file is part of datastructures.
-#
-# datastructures is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# datastructures is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with datastructures. If not, see <http://www.gnu.org/licenses/>.
+# datastructures: Implementation of core datastructures for R.  Copyright (C)
+# Simon Dirmeier This file is part of datastructures.  datastructures is free
+# software: you can redistribute it and/or modify it under the terms of the GNU
+# General Public License as published by the Free Software Foundation, either
+# version 3 of the License, or (at your option) any later version.
+# datastructures is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License along with
+# datastructures. If not, see <http://www.gnu.org/licenses/>.
 
 
 #' @title Get elements from an object
@@ -47,58 +39,4 @@ setGeneric(
         standardGeneric("get")
     },
     package = "datastructures"
-)
-
-#' @rdname get-methods
-setMethod(
-    "get",
-    signature = signature(obj = "hashmap", x = "ANY", which="missing"),
-    function(obj, x)
-    {
-        .check.key.class(obj, x)
-        obj@.map$get(x)
-    }
-)
-
-#' @title Extract elements from an object
-#'
-#' @description Access <key, value> pairs of a hashmap using a set of keys.
-#'
-#' @param x  a \code{hashmap}
-#' @param i  a vector of keys
-setMethod(
-    "[",
-    signature = signature(x="hashmap", i="ANY", j="missing", drop="missing"),
-    function(x, i)
-    {
-        get(x, i)
-    }
-)
-
-#' @rdname get-methods
-setMethod(
-    "get",
-    signature = signature(obj = "bimap", x = "ANY", which = "character"),
-    function(obj, x, which=c("values", "keys"))
-    {
-        which <- match.arg(which)
-        kc <- ifelse(which == "values", obj@.key.class, obj@.value.class)
-        .check.key.class(obj, x, kc=kc)
-
-        if (which == "keys")
-            obj@.map$get_left(x)
-        else
-            obj@.map$get_right(x)
-    }
-)
-
-#' @rdname get-methods
-setMethod(
-    "get",
-    signature = signature(obj = "bimap", x = "ANY", which = "missing"),
-    function(obj, x)
-    {
-        .check.key.class(obj, x)
-        obj@.map$get_right(x)
-    }
 )

@@ -20,8 +20,10 @@
  *
  */
 
+
 #include <Rcpp.h>
 #include "fibonacci_heap.hpp"
+
 
 RCPP_MODULE(fibonacci_heap_module) {
     Rcpp::class_< fibonacci_heap_ss >( "fibonacci_heap_ss" )
@@ -67,7 +69,6 @@ RCPP_MODULE(fibonacci_heap_module) {
         .method("size",   &fibonacci_heap_di::size)
         .method("insert", &fibonacci_heap_di::insert)
         .method("clear",  &fibonacci_heap_di::clear);
-
     Rcpp::class_< fibonacci_heap_id >( "fibonacci_heap_id" )
         .constructor()
         .method("peek",   &fibonacci_heap_id::peek)
