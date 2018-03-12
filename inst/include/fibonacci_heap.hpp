@@ -20,89 +20,28 @@
  *
  */
 
-#ifndef DS_FIBHEAP
-#define DS_FIBHEAP
+#ifndef DS_FIBONACCIHEAP
+#define DS_FIBONACCIHEAP
 
-#include <Rcpp.h>
-#include <vector>
-#include <string>
-#include <map>
 #include <boost/heap/fibonacci_heap.hpp>
+#include "heap.hpp"
 
-#include <node.hpp>
+using fibonacci_heap_ss =
+  heap<boost::heap::fibonacci_heap, std::string, std::string>;
+using fibonacci_heap_si = heap<boost::heap::fibonacci_heap, std::string, int>;
+using fibonacci_heap_sb = heap<boost::heap::fibonacci_heap, std::string, bool>;
+using fibonacci_heap_sd =
+  heap<boost::heap::fibonacci_heap, std::string, double>;
 
-template <typename T, typename U>
-class fibonacci_heap
-{
-public:
-    fibonacci_heap(): heap_()
-    {}
+using fibonacci_heap_ds =
+  heap<boost::heap::fibonacci_heap, double, std::string>;
+using fibonacci_heap_di = heap<boost::heap::fibonacci_heap, double, int>;
+using fibonacci_heap_db = heap<boost::heap::fibonacci_heap, double, bool>;
+using fibonacci_heap_dd = heap<boost::heap::fibonacci_heap, double, double>;
 
-    void insert(std::vector<T>& t, std::vector< std::vector<U> >& u)
-    {
-        if (t.size() != u.size())
-        {
-            Rcpp::stop("keys.size() != values.size()");
-        }
-        for (typename std::vector<T>::size_type i = 0; i < t.size(); ++i)
-        {
-            heap_.push(node<T, U>(t[i], u[i]));
-        }
-    }
-
-    void clear()
-    {
-        heap_.clear();
-    }
-
-    size_t size()
-    {
-        return heap_.size();
-    }
-
-    bool is_empty()
-    {
-        return heap_.empty();
-    }
-
-    Rcpp::List pop()
-    {
-        node<T, U> n = heap_.top();
-        heap_.pop();
-
-        std::map< T, std::vector<U> > heads;
-        heads.insert(std::pair<T, std::vector<U> >(n.key_, n.value_));
-
-        return Rcpp::wrap(heads);
-    }
-
-    Rcpp::List peek()
-    {
-        node<T, U> n = heap_.top();
-
-        std::map< T, std::vector<U> > heads;
-        heads.insert(std::pair<T, std::vector<U> >(n.key_, n.value_));
-
-        return Rcpp::wrap(heads);
-    }
-
-private:
-    boost::heap::fibonacci_heap< node<T, U >, boost::heap::compare<compare_node<T, U> > > heap_;
-};
-
-typedef fibonacci_heap<std::string, std::string> fibonacci_heap_ss;
-typedef fibonacci_heap<std::string, int>         fibonacci_heap_si;
-typedef fibonacci_heap<std::string, bool>        fibonacci_heap_sb;
-typedef fibonacci_heap<std::string, double>      fibonacci_heap_sd;
-
-typedef fibonacci_heap<double, std::string>  fibonacci_heap_ds;
-typedef fibonacci_heap<double, int>          fibonacci_heap_di;
-typedef fibonacci_heap<double, bool>         fibonacci_heap_db;
-typedef fibonacci_heap<double, double>       fibonacci_heap_dd;
-
-typedef fibonacci_heap<int, std::string>  fibonacci_heap_is;
-typedef fibonacci_heap<int, int>          fibonacci_heap_ii;
-typedef fibonacci_heap<int, bool>         fibonacci_heap_ib;
-typedef fibonacci_heap<int, double>       fibonacci_heap_id;
+using fibonacci_heap_is = heap<boost::heap::fibonacci_heap, int, std::string>;
+using fibonacci_heap_ii = heap<boost::heap::fibonacci_heap, int, int>;
+using fibonacci_heap_ib = heap<boost::heap::fibonacci_heap, int, bool>;
+using fibonacci_heap_id = heap<boost::heap::fibonacci_heap, int, double>;
 
 #endif

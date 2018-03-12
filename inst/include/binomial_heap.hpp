@@ -23,90 +23,25 @@
 #ifndef DS_BINOMIALHEAP
 #define DS_BINOMIALHEAP
 
-
-#include <Rcpp.h>
-#include <vector>
-#include <string>
-#include <map>
 #include <boost/heap/binomial_heap.hpp>
+#include "heap.hpp"
 
-#include <node.hpp>
+using binomial_heap_ss =
+    heap<boost::heap::binomial_heap, std::string, std::string>;
+using binomial_heap_si = heap<boost::heap::binomial_heap, std::string, int>;
+using binomial_heap_sb = heap<boost::heap::binomial_heap, std::string, bool>;
+using binomial_heap_sd =
+    heap<boost::heap::binomial_heap, std::string, double>;
 
+using binomial_heap_ds =
+    heap<boost::heap::binomial_heap, double, std::string>;
+using binomial_heap_di = heap<boost::heap::binomial_heap, double, int>;
+using binomial_heap_db = heap<boost::heap::binomial_heap, double, bool>;
+using binomial_heap_dd = heap<boost::heap::binomial_heap, double, double>;
 
-template <typename T, typename U>
-class binomial_heap
-{
-public:
-    binomial_heap(): heap_()
-    {}
-
-    void insert(std::vector<T>& t, std::vector< std::vector<U> >& u)
-    {
-        if (t.size() != u.size())
-        {
-            Rcpp::stop("keys.size() != values.size()");
-        }
-        for (typename std::vector<T>::size_type i = 0; i < t.size(); ++i)
-        {
-            heap_.push(node<T, U>(t[i], u[i]));
-        }
-    }
-
-
-    void clear()
-    {
-        heap_.clear();
-    }
-
-    size_t size()
-    {
-        return heap_.size();
-    }
-
-    bool is_empty()
-    {
-        return heap_.empty();
-    }
-
-    Rcpp::List pop()
-    {
-        node<T, U> n = heap_.top();
-        heap_.pop();
-
-        std::map< T, std::vector<U> > heads;
-        heads.insert(std::pair<T, std::vector<U>>(n.key_, n.value_));
-
-        return Rcpp::wrap(heads);
-    }
-
-    Rcpp::List peek()
-    {
-        node<T, U> n = heap_.top();
-
-        std::map< T, std::vector<U> > heads;
-        heads.insert(std::pair<T, std::vector<U>>(n.key_, n.value_));
-
-        return Rcpp::wrap(heads);
-    }
-
-private:
-    boost::heap::binomial_heap< node<T, U>,
-                                boost::heap::compare<compare_node<T, U> > > heap_;
-};
-
-typedef binomial_heap<std::string, std::string> binomial_heap_ss;
-typedef binomial_heap<std::string, int>         binomial_heap_si;
-typedef binomial_heap<std::string, bool>        binomial_heap_sb;
-typedef binomial_heap<std::string, double>      binomial_heap_sd;
-
-typedef binomial_heap<double, std::string>  binomial_heap_ds;
-typedef binomial_heap<double, int>          binomial_heap_di;
-typedef binomial_heap<double, bool>         binomial_heap_db;
-typedef binomial_heap<double, double>       binomial_heap_dd;
-
-typedef binomial_heap<int, std::string>  binomial_heap_is;
-typedef binomial_heap<int, int>          binomial_heap_ii;
-typedef binomial_heap<int, bool>         binomial_heap_ib;
-typedef binomial_heap<int, double>       binomial_heap_id;
+using binomial_heap_is = heap<boost::heap::binomial_heap, int, std::string>;
+using binomial_heap_ii = heap<boost::heap::binomial_heap, int, int>;
+using binomial_heap_ib = heap<boost::heap::binomial_heap, int, bool>;
+using binomial_heap_id = heap<boost::heap::binomial_heap, int, double>;
 
 #endif

@@ -2,7 +2,7 @@
 title: "Datastructures tutorial"
 author: "Simon Dirmeier"
 date: "`r Sys.Date()`"
-output: 
+output:
     rmarkdown::html_document:
         toc: true
         toc_depth: 2
@@ -16,6 +16,7 @@ vignette: >
 
 ```{r, eval=TRUE, include=FALSE}
   library(datastructures)
+  library(purrr)
 ```
 
 ## Introduction
@@ -41,7 +42,7 @@ This gives us heaps with `numeric` keys and `character` values. You can pick fro
   keys   <- sample(seq(0, 1, by=.2))
   values <- paste0("V", keys)
   fheap  <- insert(fheap, keys, values)
-  
+
   size(fheap)
 ```
 
@@ -62,7 +63,7 @@ If you want to add multiple values, you need to use a `vector`ial key and a `mat
 Furthermore, you can use lists as values to insert into a heap:
 
 ```{r}
-  fheap  <- insert(fheap, c(-4, -5), list("a", letters[1:4]))
+  fheap  <- insert(fheap, c(-4, -5, -6), list("a", letters[1:4], "hello"))
   peek(fheap)
 ```
 
@@ -88,22 +89,95 @@ You can alternatively insert values like this:
   peek(fheap)
 ```
 
-This works for all the described `insert` methods above.
+This works for all the described `insert` methods above. Even though we usually
+don't need to retrieve all values from a heap, you can do so using the `values` method:
+
+```{r}
+  values(fheap)
+```
+
+Sometimes, we want to decrease a key and rearrange its position in the
+heap. If we have a *unique* key this can be easily done:
+
+```{r}
+  decrease_key(fheap, from=-10, to=-11)
+  peek(fheap)
+```
+
+The function takes vectors, so you can also pass vectorial `to` and `from` arguments:
+
+```{r}
+  decrease_key(fheap, from=c(-5, -4), to=c(-15, -15))
+  peek(fheap)
+```
+
+However, things get more complicated if we have multiple identical keys and want to decrease a specific one. In this case, in order to decrease to correct node, we need to get its `handle` first:
+
+```{r}
+  handle(fheap, -15)
+```
+
+The `handle` method returns the `id` of the node and the `value` that is stored
+for a given `key` (in this case -15). Thus if we want to decrease a node with ambiguous key, we also need to specify the handle (e.g. the `id`):
+
+```{r}
+  hand <- handle(fheap, -15)  
+  decrease_key(fheap, -15, -20, hand[[1]]$handle)
+  peek(fheap)
+```
+
+The `handle` method always returns a list where every element represents a node in the heap. Every list element is again a list consisting of the node's handle (its id). So you need to check the node's value to figure out the
+corresponding handle. Furthermore, if you want to query by a node's `value`
+you would call the `handle` method like this:
+
+```{r}
+  fheap <- insert(fheap, 10, "V-10")
+  fheap <- insert(fheap, 10, "V-10")
+  h <- handle(fheap, value="V-10")
+  h
+  decrease_key(fheap, 10, -100, h[[1]]$handle)
+  peek(fheap)
+```
+
+In all of these scenarios neither the key nor the value need to be unique, because the handle (node id) always is.
+
+### Use case
+As a last example, consider this use case:
+
+```{r}
+  library('purrr')
+  bheap <- binomial_heap("character", "integer")
+  bheap <- insert(bheap, letters[c(2:6, 5, 5)], c(2:6, 5L, 7L))
+  bheap <- insert(bheap, "x", 1:3)
+  bheap <- insert(bheap, "z", 1:3)
+  peek(bheap)
+  vector.keys <- handle(bheap, value = 1:3) %>%
+    purrr::map_chr(.f = function(x) x$key)
+  vector.keys
+  decrease_key(bheap, from=vector.keys, to=c("a", "b"))
+  peek(bheap)
+  hand <- handle(bheap, key = "b")
+  hand
+  decrease_key(bheap, from="b", to="a", handle=hand[[2]]$handle)
+  pop(bheap)
+  pop(bheap)
+```
 
 
-## Hashmaps and bimaps
+## Hashmaps, bimaps and multimaps
 
-Hashmaps and bimaps use hash functions to store key-value pairs. Given a key, the hash function computes a *bucket* where the value is stored, making lookup, insertion and deletion on average possible in $\mathcal{O}(1)$ time. In the worst case these runtimes decrease to $\mathcal{O}(n)$ time, where $n$ is the number of entries in a bucket. The difference between the two classes is that hashmaps compute a mapping from keys to values (the hash function)
+Maps use hash functions to store key-value pairs. Given a key, the hash function computes a *bucket* where the value is stored, making lookup, insertion and deletion on average possible in $\mathcal{O}(1)$ time. In the worst case these runtimes decrease to $\mathcal{O}(n)$ time, where $n$ is the number of entries in a bucket. The difference between the three classes is that hashmaps and multimaps compute a mapping from keys to values (the hash function)
 $$ \, f: \mathcal{K} \rightarrow \mathcal{V} \, $$
-in **'one direction'**, while bimaps also compute a mapping 
+in **'one direction'**, while bimaps also compute a mapping
 $$ \, f: \mathcal{V} \rightarrow \mathcal{K} \, $$
-in the **'other direction'**. So a bimap is essentially a combination of two hashmaps.
+in the **'other direction'**. So a bimap is essentially a combination of two hashmaps. The difference between a hashmap and a multimap is that for hashs only *one* unique key can be stored for a value, while multimaps allow storing the same key several times fur multiple values,
 
-Hashmaps and bimaps can get created like this, this time we use `<character, integer>` pairs:
+Maps can get created like this, this time we use `<character, integer>` pairs:
 
 ```{r}
   hash  <- hashmap("character", "integer")
   bimap <- bimap("character", "integer")
+  mm    <- multimap("character", "integer")
 ```
 
 Insertion to maps works just like before, by calling the `insert` function:
@@ -113,8 +187,11 @@ Insertion to maps works just like before, by calling the `insert` function:
   values <- 1:5
   hash   <- insert(hash, keys[1:4], values[1:4])
   bimap  <- insert(bimap, keys[1:4], values[1:4])
+  mm     <- insert(mm, keys[1:4], values[1:4])
   hash[keys[5]]  <- values[5]
   bimap[keys[5]] <- values[5]
+  mm[keys[5]]    <- values[5]
+  mm[keys[5]]    <- values[1:5]
 ```
 
 Values (and keys in the case of bimaps) can then be accessed like this:
@@ -122,13 +199,16 @@ Values (and keys in the case of bimaps) can then be accessed like this:
 ```{r}
   get(hash, keys[1])
   hash[keys[1]]
-  
+
   get(bimap, keys[1], "values")
   get(bimap, values[2], "keys")
   get(bimap, keys[1])
+  
+  get(mm, keys[5])
+  mm[keys[5]]
 ```
 
-For hashmaps the subset-operator `[` is also supported for accessing elements. This does not make so much sense for bimaps, because here we have to choose whether we want to access keys or values.  In the example on the top we showed how both is possible by either providing `keys` or `values` as third argument to the `get` function. If you leave it out, then the third argument defaults to `values`. 
+For hashmaps\multimaps the subset-operator `[` is also supported for accessing elements. This does not make so much sense for bimaps, because here we have to choose whether we want to access keys or values.  In the example on the top we showed how both is possible by either providing `keys` or `values` as third argument to the `get` function. If you leave it out, then the third argument defaults to `values`.
 
 If you want to directly access `keys` or `values` as vectors or have a look at a few random elements, you would call:
 
@@ -140,7 +220,7 @@ If you want to directly access `keys` or `values` as vectors or have a look at a
 
 ## Queues and stacks
 
-Queues and stackes are two list datastructures using the `STL`'s `std::deque` in the backend, i.e. insertion at the end and getting the first element can be done in constant time $\mathcal{O}(1)$ . Queues and stacks are for example used in *depths-first-search* and *breadth-first-search* making them versatile datastructures. While queues use the *first-in-first-out* principle, stacks use the *last-in-first-out* principle. 
+Queues and stackes are two list datastructures using the `STL`'s `std::deque` in the backend, i.e. insertion at the end and getting the first element can be done in constant time $\mathcal{O}(1)$ . Queues and stacks are for example used in *depths-first-search* and *breadth-first-search* making them versatile datastructures. While queues use the *first-in-first-out* principle, stacks use the *last-in-first-out* principle.
 
 The two datatypes use the exact same methods. You can instantiate a stack or a queue using:
 
@@ -173,9 +253,9 @@ If you want to add *multiple* elements, you need to add a list:
   pop(st)
 ```
 
-The `pop` operation removed the *head* element from the data structure. 
+The `pop` operation removed the *head* element from the data structure.
 
-For a `queue` `pop` and `peek` return the *first* element that got inserted, while a stack returns the *last* element that was inserted. 
+For a `queue` `pop` and `peek` return the *first* element that got inserted, while a stack returns the *last* element that was inserted.
 
 
 ## Author

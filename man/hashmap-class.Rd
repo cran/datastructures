@@ -7,10 +7,12 @@
 \description{
 Implementation of a hashmap data structure, i.e. an unordered
 collection of key-value pairs:
-\deqn{f: keys -> values,}
+\deqn{f: keys -> values.}
+Hashmaps only to store unique keys-value pairs. For a data structure
+where multiple identical keys can be stores see \code{\link{multimap}}.
 Inserting and accessing is amortized in \emph{O(1)}.
 \code{hashmap} wraps a C++ \code{unordered_map} using Rcpp modules.
-See \code{\linkS4class{bimap}} for mappings in both ways.
+Also see \code{\linkS4class{bimap}} for mappings in both ways.
 }
 \section{Slots}{
 
