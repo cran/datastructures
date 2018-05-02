@@ -33,12 +33,13 @@ NULL
 #' @description Abstract deque class
 #'
 #' @slot .deque  \code{C++} object representing a deque
-#' @slot .key.class  the class of the keys
 #'
-setClass("deque",
-         contains = "VIRTUAL",
-         slots = list(.deque = "ANY", .key.class = "character"),
-         prototype = prototype(.deque = NULL, .key.class = NA_character_))
+setClass(
+    "deque",
+    contains = "VIRTUAL",
+    slots = list(.deque = "ANY"),
+    prototype = prototype(.deque = NULL)
+)
 
 
 #' @noRd
@@ -64,13 +65,10 @@ setClass("deque",
 #' @noRd
 .show.deque <- function(object)
 {
-    cat(paste0("An object of class ",
-               class(object)[1], "<",
-               object@.key.class, ">\n\n"))
+    cat(paste0("An object of class ", class(object)[1], "<SEXP>\n\n"))
     li <- peek(object)
     if (is.null(li))  li <- "NULL"
-    li <- paste(li, collapse = ", ")
-    cat(paste0("First element -> ", li, "\n"))
+    cat(paste0("Peek: ", class(li), ", ...\n"))
 }
 
 
@@ -84,7 +82,6 @@ setClass("deque",
 #' @noRd
 .insert.deque <- function(obj, x)
 {
-    .check.key.class(obj, x)
     obj@.deque$insert(x)
 
     obj
@@ -109,25 +106,17 @@ setMethod("size", "deque", .size.deque)
 #' @rdname insert-methods
 setMethod(
   "insert",
-  signature = signature(obj = "deque", x = "vector", y = "missing"),
+  signature = signature(obj = "deque", x = "ANY", y = "missing"),
   function(obj, x) .insert.deque(obj, list(x))
 )
-
 
 #' @rdname insert-methods
 setMethod(
   "insert",
   signature = signature(obj = "deque", x = "list", y = "missing"),
-  function(obj, x) .insert.deque(obj, x)
-)
-
-
-#' @rdname insert-methods
-setMethod(
-  "insert",
-  signature = signature(obj = "deque", x = "matrix", y = "missing"),
   function(obj, x)
   {
-    .insert.deque(obj, lapply(seq(nrow(x)), function(i) x[i, ]))
+      x <- if (is.data.frame(x)) list(x) else x
+      .insert.deque(obj, x)
   }
 )

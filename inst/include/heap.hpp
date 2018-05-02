@@ -33,111 +33,167 @@
 
 using ul = std::string;
 
-template<template<typename...> class H, typename T, typename U>
+template<template<typename...> class H, typename T>
 struct node
 {
-    typename H<node<H, T, U>>::handle_type handle_;
+    typename H<node<H, T>>::handle_type handle_;
     T key_;
-    std::vector<U> value_;
+    SEXP value_;
     ul id_;
 
-    node(T key, std::vector<U> value, ul id): key_(key), value_(value),
-                                              id_(id)
+    node(T key, SEXP value, ul id): key_(key), value_(value), id_(id)
     {}
 
-    bool operator<(const node<H, T, U>& rhs) const
+    bool operator<(const node<H, T>& rhs) const
     {
         return key_ > rhs.key_;
     }
 };
 
-template<template<typename...> class H, typename T, typename U>
+template<template<typename...> class H, typename T>
 class heap
 {
 public:
     heap() = default;
 
-    void insert(std::vector<T>& t, std::vector<std::vector<U> >& u)
+
+    ~heap()
     {
-        if (t.size() != u.size())
+        // TODO
+        // R_releaseObjects ?
+    }
+
+    void insert(std::vector<T>& t, SEXP u)
+    {
+        if(!Rf_isNewList(u))
+        {
+            Rcpp::stop("SEXP needs to be a NewList\n");
+        }
+
+        const int sexp_size = static_cast<int>(Rf_length(u));
+        if (t.size() != sexp_size)
         {
             Rcpp::stop("keys.size() != values.size()");
         }
+
         for (typename std::vector<T>::size_type i = 0; i < t.size(); ++i)
         {
             std::stringstream ss;
             ss << "handle-" << unid_++;
             std::string id = ss.str();
-            typename H<node<H, T, U>>::handle_type h =
-              heap_.push(node<H, T, U>(t[i], u[i], id));
+
+            SEXP s = Rf_duplicate(VECTOR_ELT(u, i));
+            R_PreserveObject(s);
+
+            typename H<node<H, T>>::handle_type h =
+                heap_.push(node<H, T>(t[i], s, id));
             (*h).handle_ = h;
 
             id_to_handles_.insert(
-              std::pair<ul, typename H<node<H, T, U>>::handle_type>(id, h));
+              std::pair<ul, typename H<node<H, T>>::handle_type>(id, h));
             key_to_id_.insert(std::pair<T, ul>(t[i], id));
         }
     }
 
-    Rcpp::List handles(T& from)
+    Rcpp::List handles(std::vector<T>& keys)
     {
-        std::map<ul, std::vector<U>> ret;
-        if (key_to_id_.find(from) != key_to_id_.end())
+        std::map<ul, SEXP> ret;
+        int prt = 0;
+        for (typename std::vector<T>::size_type i = 0; i < keys.size(); ++i)
         {
-            auto iterpair = key_to_id_.equal_range(from);
-            for (auto it = iterpair.first; it != iterpair.second; ++it)
+            T key = keys[i];
+            if (key_to_id_.find(key) != key_to_id_.end())
             {
-                ul id = it->second;
-                if (id_to_handles_.find(id) != id_to_handles_.end())
+                auto iterpair = key_to_id_.equal_range(key);
+                for (auto it = iterpair.first; it != iterpair.second; ++it)
                 {
-                    ret.insert(std::pair<ul, std::vector<U>>(
-                      id, (*id_to_handles_[id]).value_));
+                    ul id = it->second;
+                    if (id_to_handles_.find(id) != id_to_handles_.end())
+                    {
+                        SEXP s = PROTECT((*id_to_handles_[id]).value_);
+                        prt++;
+                        ret.insert(std::pair<ul, SEXP>(id, s));
+                    }
                 }
             }
         }
+        UNPROTECT(prt);
 
         return Rcpp::wrap(ret);
     }
 
-    Rcpp::List handles_value(std::vector<U>& from)
+
+    Rcpp::List handles_value(SEXP& values)
     {
-        std::map<ul, T> ret;
-        for (auto it = id_to_handles_.begin();
-             it != id_to_handles_.end(); ++it)
+        if(!Rf_isNewList(values))
         {
-            if (from == (*it->second).value_)
-                ret.insert(std::pair<ul, T>(it->first, (*(it->second)).key_));
+            Rcpp::stop("SEXP needs to be a NewList\n");
         }
+        const int sexp_size = static_cast<int>(Rf_length(values));
+
+        std::map<ul, T> ret;
+        int prt = 0;
+        for (int i = 0; i < sexp_size; ++i)
+        {
+            SEXP value = PROTECT(VECTOR_ELT(values, i));
+            prt++;
+            for (auto it = id_to_handles_.begin();
+                 it != id_to_handles_.end(); ++it)
+            {
+                SEXP s = PROTECT((*it->second).value_);
+                prt++;
+                if (R_compute_identical(value, s, 0))
+                    ret.insert(std::pair<ul, T>(it->first, (*(it->second)).key_));
+            }
+        }
+        UNPROTECT(prt);
 
         return Rcpp::wrap(ret);
     }
 
-    std::vector<std::vector<U>> values()
+    Rcpp::List values()
     {
-        std::vector<std::vector<U>> ret;
-        ret.reserve(id_to_handles_.size());
+        std::multimap<T, SEXP> ret;
+        int prt = 0;
         for (auto it = id_to_handles_.begin();
              it != id_to_handles_.end();
              ++it)
         {
-            ret.push_back((*(it->second)).value_);
-        }
+            SEXP el = PROTECT(Rf_allocVector(VECSXP, 3));
+            SEXP names = PROTECT(Rf_allocVector(STRSXP, 3));
+            SEXP s = PROTECT((*(it->second)).value_);
+            prt += 3;
 
-        return ret;
+            SET_STRING_ELT(names, 0, Rf_mkChar("handle"));
+            SET_STRING_ELT(names, 1, Rf_mkChar("key"));
+            SET_STRING_ELT(names, 2, Rf_mkChar("value"));
+            Rf_setAttrib(el, R_NamesSymbol, names);
+            SET_VECTOR_ELT(el, 0, Rcpp::wrap(it->first));
+            SET_VECTOR_ELT(el, 1, Rcpp::wrap((*(it->second)).key_));
+            SET_VECTOR_ELT(el, 2, s);
+
+            ret.insert(std::pair<T, SEXP>((*(it->second)).key_, el));
+
+        }
+        UNPROTECT(prt);
+
+        return Rcpp::wrap(ret);
     }
 
-    void decrease_key(std::vector<T>& from, std::vector<T>& to,
-                      std::vector<ul>& id)
+    void decrease_key(std::vector<T> from,
+                      std::vector<T> to,
+                      std::vector<ul> id)
     {
         if (from.size() != to.size() || to.size() != id.size())
         {
             Rcpp::stop(std::string("all vectors need to have same size."));
         }
+
         for (typename std::vector<T>::size_type i = 0; i < from.size(); ++i)
         {
             if (to[i] >= from[i])
             {
-                Rcpp::stop(
-                  std::string("'to' key is not smaller than 'from'"));
+                Rcpp::stop(std::string("'to' key is not smaller than 'from'"));
             }
             if (key_to_id_.find(from[i]) == key_to_id_.end())
             {
@@ -155,7 +211,7 @@ public:
                 if (it->second == id[i]) has_id = true;
             }
             if (!has_id)
-                Rcpp::stop(std::string("'from' does not fit  value 'id'"));
+                Rcpp::stop(std::string("'from' does not fit value 'id'"));
 
             decrease_key_(to[i], from[i], id[i]);
         }
@@ -166,6 +222,9 @@ public:
         heap_.clear();
         key_to_id_.clear();
         id_to_handles_.clear();
+        unid_ = 0;
+        // TODO
+        // R_releaseObjects
     }
 
     size_t size()
@@ -180,37 +239,40 @@ public:
 
     Rcpp::List pop()
     {
-        node<H, T, U> n = heap_.top();
+        node<H, T> n = heap_.top();
         heap_.pop();
 
-        std::map<T, std::vector<U> > heads;
-        heads.insert(std::pair<T, std::vector<U>>(n.key_, n.value_));
+        std::map<T, SEXP > heads;
+        SEXP s = PROTECT(n.value_);
+        heads.insert(std::pair<T, SEXP>(n.key_, s));
 
         drop_from_key_map_(n.key_, n.id_);
         drop_from_id_map_(n.id_);
-
+        UNPROTECT(1);
+        R_ReleaseObject(s);
         return Rcpp::wrap(heads);
     }
 
     Rcpp::List peek()
     {
-        node<H, T, U> n = heap_.top();
-
-        std::map<T, std::vector<U> > heads;
-        heads.insert(std::pair<T, std::vector<U>>(n.key_, n.value_));
+        node<H, T> n = heap_.top();
+        std::map<T, SEXP > heads;
+        SEXP s = PROTECT(n.value_);
+        heads.insert(std::pair<T, SEXP>(n.key_, s));
+        UNPROTECT(1);
 
         return Rcpp::wrap(heads);
     }
 
 private:
-    void decrease_key_(T& to, T& from, ul id)
+    void decrease_key_(T to, T from, ul id)
     {
         drop_from_key_map_(from, id);
         decrease_(to, id);
         key_to_id_.insert(std::pair<T, ul>(to, id));
     }
 
-    void drop_from_key_map_(T& from, ul id)
+    void drop_from_key_map_(T from, ul id)
     {
         auto iterpair = key_to_id_.equal_range(from);
         for (auto it = iterpair.first; it != iterpair.second; ++it)
@@ -231,17 +293,18 @@ private:
         }
     }
 
-    void decrease_(T& to, ul id)
+    void decrease_(T to, ul id)
     {
         (*id_to_handles_[id]).key_ = to;
         heap_.decrease(id_to_handles_[id]);
         heap_.update(id_to_handles_[id]);
     }
 
-    H<node<H, T, U>> heap_;
+    SEXP obj_;
+    H<node<H, T>> heap_;
     std::unordered_multimap<T, ul> key_to_id_;
     std::unordered_map<
-      ul, typename H<node<H, T, U>>::handle_type> id_to_handles_;
+      ul, typename H<node<H, T>>::handle_type> id_to_handles_;
     unsigned long unid_ = 0;
 
 };

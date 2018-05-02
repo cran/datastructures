@@ -1,8 +1,8 @@
 Package: datastructures
 Type: Package
 Title: Implementation of Core Data Structures
-Version: 0.2.5
-Date: 2018-03-10
+Version: 0.2.6
+Date: 2018-04-22
 Authors@R: person("Simon", "Dirmeier",
                   email = "simon.dirmeier@web.de",
                   role = c("aut", "cre"))
@@ -32,7 +32,7 @@ Collate: 'checks.R' 'datastructures-package.R' 'methods_insert.R'
         'ds_map.R' 'methods_keys.R' 'methods_get.R' 'ds_map_bimap.R'
         'ds_map_unordered.R' 'ds_map_hashmap.R' 'ds_map_multimap.R'
         'zzz.R'
-Packaged: 2018-03-12 21:17:15 UTC; simondi
+Packaged: 2018-05-02 08:42:59 UTC; simondi
 Author: Simon Dirmeier [aut, cre]
 Repository: CRAN
-Date/Publication: 2018-03-13 00:00:41 UTC
+Date/Publication: 2018-05-02 11:13:08 UTC

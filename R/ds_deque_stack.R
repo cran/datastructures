@@ -31,7 +31,6 @@
 #'  the FIFO principle.
 #'
 #' @slot .deque  \code{C++} object representing a deque
-#' @slot .key.class  the class of the keys
 #'
 setClass("stack", contains = "deque")
 
@@ -44,20 +43,10 @@ setClass("stack", contains = "deque")
 #' @description Instantiates a new \code{\linkS4class{stack}} object,
 #'  i.e. a list implementation with LIFO principle.
 #'
-#' @param key.class  the primitive class type of the keys
-#'
 #' @return returns a new \code{stack} object
 #'
-stack <- function(key.class = c("character", "numeric", "integer"))
+stack <- function()
 {
-    key.class <- match.arg(key.class)
-    if (key.class == "character") {
-        stack <- methods::new(stack_s)
-    } else if (key.class == "numeric") {
-        stack <- methods::new(stack_d)
-    } else {
-        stack <- methods::new(stack_i)
-    }
-
-    methods::new("stack", .key.class = key.class, .deque = stack)
+    stack <- methods::new(stack_sexp)
+    methods::new("stack", .deque = stack)
 }

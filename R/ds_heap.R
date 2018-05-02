@@ -37,31 +37,22 @@ NULL
 #'
 #' @slot .heap  \code{C++} object representing a heap
 #' @slot .key.class  the class of the keys
-#' @slot .value.class  the class of the values
 #'
 setClass(
   "heap",
   contains = "VIRTUAL",
-  slots = list(.heap = "ANY",
-               .key.class = "character",
-               .value.class = "character"),
+  slots = list(.heap = "ANY", .key.class = "character"),
   prototype = prototype(.heap = NULL,
-                        .key.class = NA_character_,
-                        .value.class = NA_character_)
+                        .key.class = NA_character_)
 )
 
 
 #' @noRd
 .insert.heap <- function(obj, x, y)
 {
-    if (is.matrix(y))
-        y <- lapply(seq(nrow(y)), function(i) y[i, ] )
-    else if (length(x) == 1 && is.vector(y))
-        y <- list(y)
-    else if (length(x) == length(y) && is.vector(y))
-        y <- as.list(y)
-
-    .check.key.value.classes(obj, x, y)
+    if (length(x) != length(y))
+        stop("dimensions of keys and values do not match")
+    .check.key.class(obj, x)
     obj@.heap$insert(x, y)
 
     obj
@@ -92,15 +83,12 @@ setClass(
 .show.heap <- function(object)
 {
     cat(paste0("An object of class ", class(object)[1],
-               "<", object@.key.class, ",",
-               object@.value.class, ">\n\n"))
+               "<", object@.key.class, ", SEXP>\n\n"))
     li       <- peek(object)
     li.names <- names(li)
-    if (is.null(li))
-        li <- "NULL"
-    if (is.null(li.names))
-        li.names <- "NULL"
-    cat(paste0(li.names, " -> ", li, "\n"))
+    if (is.null(li.names)) li.names <- "NULL"
+    else li <- li[[1]]
+    cat(paste0("Peek: ", li.names, " -> ", class(li), ", ...\n"))
 }
 
 
@@ -115,17 +103,13 @@ setClass(
 #' @importFrom purrr map
 .handle <- function(obj, key, value)
 {
-    if (!is.null(key))
-    {
+    if (!is.null(key)) {
         .check.key.class(obj, key)
         ret <- obj@.heap$handles(key)
-        ret <- purrr::map(names(ret),
-                          .f = function(x) list(handle=x, value=ret[[x]]))
-    }
-    else if (!is.null(value))
-    {
-        .check.value.class(obj, value)
-        ret <- obj@.heap$handles_value(value)
+        ret <- purrr::map(
+            names(ret), .f = function(x) list(handle=x, value=ret[[x]]))
+    } else if(!is.null(value)) {
+        ret <- obj@.heap$handle_values(value)
         ret <- purrr::map(names(ret),
                           .f = function(x) list(handle=x, key=ret[[x]]))
     }
@@ -145,21 +129,17 @@ setClass(
     for (i in seq_along(from))
     {
       handle.ids <- obj@.heap$handles(from[i])
-      if (length(handle.ids) == 1) { handlex[i] <- names(handle.ids)[1] }
-      else if (length(handle.ids) == 0)
-      {
-        stop(paste0("Zero handles found for '", from[i], "'."))
-      }
-      else
-      {
+      if (length(handle.ids) == 1) {
+        handlex[i] <- names(handle.ids)[1]
+      } else if (length(handle.ids) == 0) {
+        stop(paste0("no handles found for '", from[i], "'."))
+      } else {
         stop(paste0(
             "Multiple handles found for '", from[i], "'. ",
             "Please specify handles implicitely."))
       }
     }
-  }
-  else
-  {
+  } else {
     handlex <- handle
   }
 
@@ -168,9 +148,11 @@ setClass(
 
 
 #' @noRd
+#' @importFrom purrr map
 .heap_values <- function(obj)
 {
-  obj@.heap$values()
+    ret <- obj@.heap$values()
+    ret
 }
 
 
@@ -178,23 +160,42 @@ setClass(
 setMethod(
   "insert",
   signature = signature(obj = "heap", x = "vector", y = "vector"),
-  function(obj, x, y) .insert.heap(obj, x, y)
+  function(obj, x, y)
+  {
+      if (length(x) == 1) y <- list(y)
+      else if (length(x) == length(y) && is.vector(y))
+        y <- as.list(y)
+      .insert.heap(obj, x, y)
+  }
 )
+
+#' @rdname insert-methods
+setMethod(
+    "insert",
+    signature = signature(obj = "heap", x = "vector", y = "matrix"),
+    function(obj, x, y)
+    {
+        if (length(x) == 1) y <- list(y)
+        else stop("length(x) != 0")
+        .insert.heap(obj, x, y)
+    }
+)
+
 
 
 #' @rdname insert-methods
 setMethod(
   "insert",
   signature = signature(obj = "heap", x = "vector", y = "list"),
-  function(obj, x, y) .insert.heap(obj, x, y)
-)
-
-
-#' @rdname insert-methods
-setMethod(
-  "insert",
-  signature = signature(obj = "heap", x = "vector", y = "matrix"),
-  function(obj, x, y) .insert.heap(obj, x, y)
+  function(obj, x, y)
+  {
+      if (length(x) == 1 && is.data.frame(y)) y <- list(y)
+      else if (is.list(y) &&
+               length(x) == 1 &&
+               length(y) == 1 &&
+               !is.list(y[[1]])) y <- list(y)
+      .insert.heap(obj, x, y)
+  }
 )
 
 
@@ -211,7 +212,7 @@ setMethod(
 setMethod(
   "[<-",
   signature = signature(x="heap", i="vector", j="missing", value="vector"),
-  function(x, i, value) .insert.heap(x, i, value)
+  function(x, i, value) insert(x, i, value)
 )
 
 
@@ -228,7 +229,7 @@ setMethod(
 setMethod(
   "[<-",
   signature = signature(x="heap", i="vector", j="missing", value="list"),
-  function(x, i, value) .insert.heap(x, i, value)
+  function(x, i, value) insert(x, i, value)
 )
 
 
@@ -243,10 +244,11 @@ setMethod(
 #' @param i  a vector of keys
 #' @param value  a vector of values for the keys
 setMethod(
-  "[<-",
-  signature = signature(x="heap", i="vector", j="missing", value="matrix"),
-  function(x, i, value) .insert.heap(x, i, value)
+    "[<-",
+    signature = signature(x="heap", i="vector", j="missing", value="matrix"),
+    function(x, i, value) insert(x, i, value)
 )
+
 
 #' @rdname handle-methods
 setMethod(
@@ -259,16 +261,44 @@ setMethod(
 #' @rdname handle-methods
 setMethod(
     "handle",
-    signature = signature(obj="heap", key="missing", value="vector"),
-    function(obj, value) .handle(obj, NULL, value)
+    signature = signature(obj="heap", key="missing", value="list"),
+    function(obj, value)
+    {
+        if (is.data.frame(value)) value <- list(value)
+        else if (is.list(value) &&
+                 length(value) == 1 &&
+                 !is.list(value[[1]])) value <- list(value)
+        .handle(obj, NULL, value)
+    }
 )
 
+
+#' @rdname handle-methods
+setMethod(
+    "handle",
+    signature = signature(obj="heap", key="missing", value="vector"),
+    function(obj, value)
+    {
+        .handle(obj, NULL, list(value))
+    }
+)
+
+
+#' @rdname handle-methods
+setMethod(
+    "handle",
+    signature = signature(obj="heap", key="missing", value="matrix"),
+    function(obj, value)
+    {
+        .handle(obj, NULL, list(value))
+    }
+)
 
 #' @rdname decrease_key-methods
 setMethod(
   "decrease_key",
-  signature = signature(obj="heap",
-                        from="vector", to="vector", handle="character"),
+  signature = signature(
+      obj="heap", from="vector", to="vector", handle="character"),
   function(obj, from, to, handle) .decrease_key(obj, from, to, handle)
 )
 
@@ -276,8 +306,8 @@ setMethod(
 #' @rdname decrease_key-methods
 setMethod(
   "decrease_key",
-  signature = signature(obj="heap",
-                        from="vector", to="vector", handle="missing"),
+  signature = signature(
+      obj="heap", from="vector", to="vector", handle="missing"),
   function(obj, from, to) .decrease_key(obj, from, to, NULL)
 )
 

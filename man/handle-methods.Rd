@@ -4,14 +4,20 @@
 \name{handle}
 \alias{handle}
 \alias{handle,heap,vector,missing-method}
+\alias{handle,heap,missing,list-method}
 \alias{handle,heap,missing,vector-method}
+\alias{handle,heap,missing,matrix-method}
 \title{Get the handles and values for nodes of a specific key in a heap.}
 \usage{
 handle(obj, key, value)
 
 \S4method{handle}{heap,vector,missing}(obj, key)
 
+\S4method{handle}{heap,missing,list}(obj, value)
+
 \S4method{handle}{heap,missing,vector}(obj, value)
+
+\S4method{handle}{heap,missing,matrix}(obj, value)
 }
 \arguments{
 \item{obj}{a heap object}
