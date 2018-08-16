@@ -33,9 +33,9 @@ template<typename T, typename U>
 class bimap
 {
    public:
-    typedef typename boost::bimap<T, U>::value_type position;
-    typedef typename boost::bimap<T, U>::right_map::const_iterator ri;
-    typedef typename boost::bimap<T, U>::left_map::const_iterator li;
+    using position = typename boost::bimap<T, U>::value_type;
+    using ri = typename boost::bimap<T, U>::right_map::const_iterator;
+    using li = typename boost::bimap<T, U>::left_map::const_iterator;
 
     bimap() : map_()
     {
@@ -55,6 +55,27 @@ class bimap
         for (typename std::vector<T>::size_type i = 0; i < t.size(); ++i)
         {
             map_.insert(position(t[i], u[i]));
+        }
+    }
+
+    void clear()
+    {
+        map_.clear();
+    }
+
+    void remove(std::vector<T>& t)
+    {
+        for (typename std::vector<T>::size_type i = 0; i < t.size(); ++i)
+        {
+            map_.left.erase(t[i]);
+        }
+    }
+
+    void remove_value(std::vector<U>& u)
+    {
+        for (typename std::vector<U>::size_type i = 0; i < u.size(); ++i)
+        {
+            map_.right.erase(u[i]);
         }
     }
 
@@ -112,7 +133,7 @@ class bimap
             }
             else
             {
-                std::stringstream ss;
+                std::ostringstream ss;
                 ss << key;
                 Rcpp::stop(
                   std::string("Could not find key: ").append(ss.str()));
@@ -135,7 +156,7 @@ class bimap
             }
             else
             {
-                std::stringstream ss;
+                std::ostringstream ss;
                 ss << key;
                 Rcpp::stop(
                   std::string("Could not find key: ").append(ss.str()));

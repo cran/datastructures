@@ -338,6 +338,7 @@ test_that("heap checks out list situations",
       bheap <- insert(bheap, 3L,  list(list(1)))
       bheap <- insert(bheap, 4L,  list(data.frame(A=1)))
       bheap <- insert(bheap, 6:7, list(1, list(a=2)))
+      bheap <- insert(bheap, 8L, list(1, list(a=2)))
       res <- pop(bheap)
       expect_true(res[[1]]$A == 1)
       res <- pop(bheap)
@@ -345,7 +346,7 @@ test_that("heap checks out list situations",
       res <- pop(bheap)
       expect_true(res[[1]][[1]] == 1)
       res <- pop(bheap)
-      expect_true(res[[1]]$A == 1)
+      expect_true(res[[1]][[1]]$A == 1)
       res <- pop(bheap)
       expect_true(res[[1]] == 1)
       res <- pop(bheap)
@@ -408,15 +409,28 @@ test_that("heap handle_values works with vector",
   }
 })
 
+
 test_that("heap handle_values works with matrix",
 {
   for (h in hs)
   {
       bheap <- h("integer")
       bheap <- insert(bheap, 1L, matrix(1, 5, 5))
-      vals <- handle(bheap, value=matrix(1, 5, 5))
+      vals  <- handle(bheap, value=matrix(1, 5, 5))
       expect_equal(vals[[1]]$key,  1L)
       expect_equal(length(vals), 1)
   }
 })
 
+
+test_that("heap clears correctly",
+{
+  for (h in hs)
+  {
+      bheap <- h("integer")
+      bheap <- insert(bheap, seq(10), rnorm(10))
+      expect_equal(size(bheap), 10)
+      bheap <- clear(bheap)
+      expect_equal(size(bheap), 0)
+  }
+})

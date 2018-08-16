@@ -18,25 +18,26 @@
 # along with datastructures. If not, see <http://www.gnu.org/licenses/>.
 
 
-context("deque")
+#' @title Remove an entry from a map
+#'
+#' @description Remove a vector of key-value pair from a map object.
+#'
+#' @export
+#' @docType methods
+#' @rdname remove-methods
+#'
+#' @param obj  the object to pop an element from
+#' @param key  a vector of keys that should be removed
+#' @param value optionally a list of values needs to be supplied for some data
+#'  structures such as multimaps if entries should be removed.
 
-
-ds <- c(queue, stack)
-
-
-test_that("abstract class cannot get instantiated", {
-    expect_error(methods::new("deque"))
-})
-
-
-test_that("deque clears correctly",
-{
-  for (d in ds)
-  {
-      deq <- d()
-      deq <- insert(deq, rnorm(10))
-      expect_equal(size(deq), 1)
-      deq <- clear(deq)
-      expect_equal(size(deq), 0)
-  }
-})
+#' @return  returns \code{obj} with removed values
+#'
+setGeneric(
+    "remove",
+    function(obj, key, value)
+    {
+        standardGeneric("remove")
+    },
+    package = "datastructures"
+)

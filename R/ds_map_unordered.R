@@ -44,12 +44,14 @@ setClass(
 
 
 #' @noRd
+#' @importFrom methods is
 .insert.unordered_map <- function(obj, x, y)
 {
   if (length(x) != length(y))
-    stop("dimensions of keys and values do not match")
+    stop("dimensions of keys and values do not match", call.=FALSE)
 
   .check.key.class(obj, x)
+  if (methods::is(obj, "hashmap")) remove(obj, x)
   obj@.map$insert(x, y)
 
   obj
@@ -58,27 +60,27 @@ setClass(
 
 #' @rdname insert-methods
 setMethod(
-  "insert",
-  signature = signature(obj = "unordered_map", x = "vector", y = "vector"),
-  function(obj, x, y)
-  {
-    if (length(x) == 1) y <- list(y)
-    else if (length(x) == length(y) && is.vector(y))
-      y <- as.list(y)
-    .insert.unordered_map(obj, x, y)
-  }
+    "insert",
+    signature = signature(obj = "unordered_map", x = "vector", y = "vector"),
+    function(obj, x, y)
+    {
+        if (length(x) == 1) y <- list(y)
+        else if (length(x) == length(y) && is.vector(y))
+            y <- as.list(y)
+        .insert.unordered_map(obj, x, y)
+    }
 )
 
 
 #' @rdname insert-methods
 setMethod(
-  "insert",
-  signature = signature(obj = "unordered_map", x = "vector", y = "list"),
-  function(obj, x, y)
-  {
-    y <- if (is.data.frame(y)) list(y) else y
-      .insert.unordered_map(obj, x, y)
-  }
+    "insert",
+    signature = signature(obj = "unordered_map", x = "vector", y = "list"),
+    function(obj, x, y)
+    {
+        if (length(x) == 1) y <- list(y)
+        .insert.unordered_map(obj, x, y)
+    }
 )
 
 

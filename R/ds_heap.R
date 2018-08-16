@@ -25,6 +25,7 @@
 #' @include methods_handle.R
 #' @include methods_decrease.R
 #' @include methods_values.R
+#' @include methods_clear.R
 NULL
 
 
@@ -100,6 +101,14 @@ setClass(
 
 
 #' @noRd
+.clear.heap <- function(obj)
+{
+    obj@.heap$clear()
+    obj
+}
+
+
+#' @noRd
 #' @importFrom purrr map
 .handle <- function(obj, key, value)
 {
@@ -158,16 +167,17 @@ setClass(
 
 #' @rdname insert-methods
 setMethod(
-  "insert",
-  signature = signature(obj = "heap", x = "vector", y = "vector"),
-  function(obj, x, y)
-  {
-      if (length(x) == 1) y <- list(y)
-      else if (length(x) == length(y) && is.vector(y))
-        y <- as.list(y)
-      .insert.heap(obj, x, y)
-  }
+    "insert",
+    signature = signature(obj = "heap", x = "vector", y = "vector"),
+    function(obj, x, y)
+    {
+        if (length(x) == 1) y <- list(y)
+        else if (length(x) == length(y) && is.vector(y))
+            y <- as.list(y)
+        .insert.heap(obj, x, y)
+    }
 )
+
 
 #' @rdname insert-methods
 setMethod(
@@ -182,20 +192,28 @@ setMethod(
 )
 
 
-
 #' @rdname insert-methods
 setMethod(
   "insert",
   signature = signature(obj = "heap", x = "vector", y = "list"),
   function(obj, x, y)
   {
-      if (length(x) == 1 && is.data.frame(y)) y <- list(y)
-      else if (is.list(y) &&
-               length(x) == 1 &&
-               length(y) == 1 &&
-               !is.list(y[[1]])) y <- list(y)
+      if (length(x) == 1) y <- list(y)
       .insert.heap(obj, x, y)
   }
+)
+
+
+#' @rdname insert-methods
+setMethod(
+    "insert",
+    signature = signature(obj = "heap", x = "vector", y = "ANY"),
+    function(obj, x, y)
+    {
+        if (length(x) == 1) y <- list(y)
+        else stop("length(x) != 1", call. = FALSE)
+        .insert.heap(obj, x, y)
+    }
 )
 
 
@@ -319,6 +337,7 @@ setMethod("peek", "heap", .peek.heap)
 #' @rdname pop-methods
 setMethod("pop", "heap", .pop.heap)
 
+
 #' @noRd
 setMethod("show", "heap", .show.heap)
 
@@ -329,3 +348,7 @@ setMethod("size", "heap", .size.heap)
 
 #' @rdname values-methods
 setMethod("values", "heap", .heap_values)
+
+
+#' @rdname clear-methods
+setMethod("clear", "heap", .clear.heap)

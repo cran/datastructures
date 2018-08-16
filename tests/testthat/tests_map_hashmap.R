@@ -18,25 +18,14 @@
 # along with datastructures. If not, see <http://www.gnu.org/licenses/>.
 
 
-context("deque")
+context("hashmap")
 
 
-ds <- c(queue, stack)
-
-
-test_that("abstract class cannot get instantiated", {
-    expect_error(methods::new("deque"))
-})
-
-
-test_that("deque clears correctly",
-{
-  for (d in ds)
-  {
-      deq <- d()
-      deq <- insert(deq, rnorm(10))
-      expect_equal(size(deq), 1)
-      deq <- clear(deq)
-      expect_equal(size(deq), 0)
-  }
+test_that("hashmap replace works", {
+    h <- hashmap("integer")
+    h <- insert(h, 1L, 3)
+    expect_equal(h[1L][[1]], 3)
+    h <- insert(h, 2L, list(a=1))
+    h <- insert(h, 1L, 2)
+    expect_equal(h[1L][[1]], 2)
 })

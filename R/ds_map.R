@@ -20,7 +20,8 @@
 
 #' @include methods_size.R
 #' @include methods_head.R
-
+#' @include methods_remove.R
+#' @include methods_clear.R
 
 #' @title Map class
 #'
@@ -74,6 +75,36 @@ setClass(
 {
   obj@.map$size()
 }
+
+
+#' @noRd
+.clear.map <- function(obj)
+{
+    obj@.map$clear()
+    obj
+}
+
+
+#' @noRd
+.remove.map <- function(obj, key)
+{
+    .check.key.class(obj, key)
+    obj@.map$remove(key)
+
+    obj
+}
+
+
+#' @rdname remove-methods
+setMethod(
+    "remove",
+    signature = signature(obj = "map", key = "vector", value = "missing"),
+    function(obj, key) .remove.map(obj, key)
+)
+
+
+#' @rdname clear-methods
+setMethod("clear", "map", .clear.map)
 
 
 #' @noRd

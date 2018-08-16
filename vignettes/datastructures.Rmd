@@ -8,6 +8,7 @@ output:
         toc_depth: 2
         toc_float: true
         theme: lumen
+        highlight: pygments
 vignette: >
   %\VignetteIndexEntry{Datastructures tutorial}
   %\VignetteEngine{knitr::rmarkdown}
@@ -108,7 +109,6 @@ This works for all the described `insert` methods above.
 
 ### Decreasing the key of a node
 
-
 Sometimes, we want to decrease a key and rearrange its position in the
 heap. If we have a *unique* key this can be easily done:
 
@@ -181,7 +181,18 @@ Finally, you can get all data from a heap, by calling the `value` function:
 
 In all of these scenarios neither the key nor the value need to be unique, because the handle (node id) always is.
 
+### Clearing the heap
+
+You can remove all entries from a heap by calling:
+
+```{r}
+  fheap <- clear(fheap)
+  fheap
+```
+
+
 ### Use case
+
 As a last example, consider this use case whre we use a `character` heap.
 
 ```{r}
@@ -268,6 +279,44 @@ If you want to directly access `keys` or `values` as vectors or have a look at a
   head(bimap)
 ```
 
+Removing entries in all of the three map classes works like this:
+
+```{r}
+  hash <- remove(hash, keys[1])
+  hash
+  mm <- remove(mm, keys[2])
+  mm
+```
+
+As you can see for multimaps, all key-value pairs get removed, when the function is called as above. 
+If you are interested in only one specific  key-value pair, you additionally need to supply the respective value:
+
+```{r}
+  mm <- insert(mm, keys[c(2, 2)], list(list(a=1), data.frame(a=rnorm(5), 2, 3)))
+  mm <- remove(mm, keys[2], list(a=1))
+  mm[ keys[2] ]
+```
+
+For bimaps we can also remove from the other side, i.e. when we provide a value:
+
+```{r}
+  bimap <- remove(bimap, value=values[1])
+  bimap
+```
+
+For multimaps, where we allow having the same key several times, removing an entry as above removes *all* the key-value pairs with the
+
+The three different map types support to easily clear the entire data structure using:
+
+```{r}
+  clear(bimap)
+  size(bimap)
+  clear(hash)
+  size(hash)
+  clear(mm)
+  size(mm)
+```
+
 ## Queues and stacks
 
 Queues and stackes are two list datastructures using the `STL`'s `std::deque` 
@@ -315,6 +364,14 @@ The size of a deque can be computed by calling:
 ```{r}
   size(qu)
 ```
+
+Stacks and queues can be emptied like this:
+
+```{r}
+  qu <- clear(qu)
+  qu
+```
+
 
 ## Author
 

@@ -22,6 +22,7 @@
 #' @include methods_pop.R
 #' @include methods_size.R
 #' @include methods_insert.R
+#' @include methods_clear.R
 NULL
 
 
@@ -41,6 +42,12 @@ setClass(
     prototype = prototype(.deque = NULL)
 )
 
+
+.clear.deque <- function(obj)
+{
+    obj@.deque$clear()
+    obj
+}
 
 #' @noRd
 .peek.deque <- function(obj)
@@ -67,7 +74,6 @@ setClass(
 {
     cat(paste0("An object of class ", class(object)[1], "<SEXP>\n\n"))
     li <- peek(object)
-    if (is.null(li))  li <- "NULL"
     cat(paste0("Peek: ", class(li), ", ...\n"))
 }
 
@@ -83,7 +89,6 @@ setClass(
 .insert.deque <- function(obj, x)
 {
     obj@.deque$insert(x)
-
     obj
 }
 
@@ -110,13 +115,18 @@ setMethod(
   function(obj, x) .insert.deque(obj, list(x))
 )
 
+
 #' @rdname insert-methods
 setMethod(
   "insert",
   signature = signature(obj = "deque", x = "list", y = "missing"),
   function(obj, x)
   {
-      x <- if (is.data.frame(x)) list(x) else x
+      x <- if (is.data.frame(x) || length(x) == 1) list(x) else x
       .insert.deque(obj, x)
   }
 )
+
+
+#' @rdname clear-methods
+setMethod("clear", "deque", .clear.deque)

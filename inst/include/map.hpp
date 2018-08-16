@@ -44,22 +44,58 @@ namespace datastructures
             return map_.size();
         }
 
-        void insert(std::vector<T>& t, SEXP u)
+        void insert(std::vector<T>& t, Rcpp::RObject u)
         {
             if(!Rf_isNewList(u))
             {
-                Rcpp::stop("SEXP needs to be a NewList\n");
+                Rcpp::stop(
+                    "Rcpp::RObject needs to be a NewList\n");
             }
 
-            const int sexp_size = static_cast<int>(Rf_length(u));
+            const unsigned int sexp_size = static_cast<unsigned int>(Rf_length(u));
             if (t.size() != sexp_size)
             {
                 Rcpp::stop("keys.size() != values.size()");
             }
             for (typename std::vector<T>::size_type i = 0; i < t.size(); ++i)
             {
-                map_.insert(std::pair<T, SEXP>(t[i], VECTOR_ELT(u, i)));
+                Rcpp::RObject s = Rf_duplicate(VECTOR_ELT(u, i));
+                map_.insert(std::pair<T, Rcpp::RObject>(t[i], s));
             }
+        }
+
+        void clear()
+        {
+            for (auto it = map_.begin(); it != map_.end(); ++it)
+                R_ReleaseObject(it->second);
+            map_.clear();
+        }
+
+        void remove_with_value(std::vector<T>& t, Rcpp::RObject u)
+        {
+            for (typename std::vector<T>::size_type i = 0; i < t.size(); ++i)
+            {
+                auto iter = map_.equal_range(t[i]);
+                for (auto it = iter.first; it != iter.second; ++it)
+                {
+                    if (R_compute_identical(VECTOR_ELT(u, i), it->second, 0))
+                    {
+                        map_.erase(it);
+                        break;
+                    }
+                }
+            }
+        }
+
+        void remove(std::vector<T>& t)
+        {
+            for (typename std::vector<T>::size_type i = 0; i < t.size(); ++i)
+                map_.erase(t[i]);
+        }
+
+        bool is_empty()
+        {
+            return map_.empty();
         }
 
         std::vector<T> keys()
@@ -76,12 +112,17 @@ namespace datastructures
 
         Rcpp::List values()
         {
-            std::vector< SEXP > values;
+            std::vector< Rcpp::RObject > values;
             values.reserve(map_.size());
+
+            int prt = 0;
             for (const auto& pair : map_)
             {
-                values.push_back(pair.second);
+                Rcpp::RObject s = PROTECT(pair.second);
+                values.push_back(s);
+                ++prt;
             }
+            UNPROTECT(prt);
 
             return Rcpp::wrap(values);
         }
@@ -89,7 +130,7 @@ namespace datastructures
         Rcpp::List head()
         {
             unsigned int i = 0;
-            std::map<T, SEXP> heads;
+            std::map<T, Rcpp::RObject> heads;
             for (const auto& pair : map_)
             {
                 if (i++ == 5) break;
@@ -101,7 +142,9 @@ namespace datastructures
 
         Rcpp::List get(std::vector<T>& t)
         {
-            std::vector< SEXP > values;
+            std::vector< Rcpp::RObject > values;
+            int prt = 0;
+
             for (typename std::vector<T>::size_type i = 0; i < t.size(); ++i)
             {
                 T key = t[i];
@@ -109,21 +152,28 @@ namespace datastructures
                 {
                     auto range = map_.equal_range(key);
                     for (auto it = range.first; it != range.second; ++it)
-                        values.push_back(it->second);
+                    {
+                        Rcpp::RObject s = PROTECT(it->second);
+                        ++prt;
+                        values.push_back(s);
+                    }
                 }
                 else
                 {
-                    std::stringstream ss;
+                    std::ostringstream ss;
                     ss << key;
-                    Rcpp::stop(std::string("Could not find key: ").append(ss.str()));
+                    UNPROTECT(prt);
+                    Rcpp::stop(
+                        std::string("Could not find key: ").append(ss.str()));
                 }
             }
+            UNPROTECT(prt);
 
             return Rcpp::wrap(values);
         }
 
     private:
-        H<T, SEXP> map_;
+        H<T, Rcpp::RObject> map_;
     };
 }
 #endif
