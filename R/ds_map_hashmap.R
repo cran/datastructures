@@ -39,6 +39,8 @@
 #' @slot .map  \code{C++} object representing a mapping
 #' @slot .key.class  the class of the keys
 #'
+#' @seealso  \code{\link{hashmap}} for creating a new \code{hashmap} object
+#'
 setClass("hashmap", contains = "unordered_map")
 
 
@@ -55,6 +57,16 @@ setClass("hashmap", contains = "unordered_map")
 #' @param key.class  the primitive class type of the keys
 #'
 #' @return returns a new \code{hashmap} object
+#'
+#' @examples
+#'  # creates a hashmap<character, SEXP>
+#'  h <- hashmap()
+#'
+#'  # creates a hashmap<integer, SEXP>
+#'  h <- hashmap("integer")
+#'
+#'  # creates a hashmap<numeric, SEXP>
+#'  h <- hashmap("numeric")
 #'
 hashmap <- function(key.class = c("character", "numeric", "integer"))
 {

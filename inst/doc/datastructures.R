@@ -113,34 +113,34 @@
   mm[keys[5]]    <- diag(5)
 
 ## ------------------------------------------------------------------------
-  get(hash, keys[1])
+  at(hash, keys[1])
   hash[keys[1]]
 
-  get(bimap, keys[1], "values")
-  get(bimap, values[2], "keys")
-  get(bimap, keys[1])
+  at(bimap, keys[1], "values")
+  at(bimap, values[2], "keys")
+  at(bimap, keys[1])
   
-  get(mm, keys[2])
+  at(mm, keys[2])
   mm[keys[5]]
 
 ## ------------------------------------------------------------------------
   keys(bimap)
   values(hash)
-  head(bimap)
+  peek(bimap)
 
 ## ------------------------------------------------------------------------
-  hash <- remove(hash, keys[1])
+  hash <- erase(hash, keys[1])
   hash
-  mm <- remove(mm, keys[2])
+  mm <- erase(mm, keys[2])
   mm
 
 ## ------------------------------------------------------------------------
   mm <- insert(mm, keys[c(2, 2)], list(list(a=1), data.frame(a=rnorm(5), 2, 3)))
-  mm <- remove(mm, keys[2], list(a=1))
+  mm <- erase(mm, keys[2], list(a=1))
   mm[ keys[2] ]
 
 ## ------------------------------------------------------------------------
-  bimap <- remove(bimap, value=values[1])
+  bimap <- erase(bimap, value=values[1])
   bimap
 
 ## ------------------------------------------------------------------------

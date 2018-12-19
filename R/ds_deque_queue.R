@@ -32,6 +32,8 @@
 #'
 #' @slot .deque  \code{C++} object representing a deque
 #'
+#' @seealso  \code{\link{queue}} for creating a new \code{queue} object.
+#'
 setClass("queue", contains = "deque")
 
 
@@ -44,6 +46,10 @@ setClass("queue", contains = "deque")
 #'  i.e. a list implementation with FIFO principle.
 #'
 #' @return returns a new \code{queue} object
+#'
+#' @examples
+#'  # returns a new queue<SEXP>
+#'  q <- queue()
 #'
 queue <- function()
 {

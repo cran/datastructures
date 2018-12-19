@@ -34,6 +34,8 @@
 #' @slot .heap  \code{C++} object representing a heap
 #' @slot .key.class  the class of the keys
 #'
+#' @seealso  \code{\link{fibonacci_heap}} for creating a new \code{fibonacci_heap} object
+#'
 setClass("fibonacci_heap", contains = "heap")
 
 
@@ -48,6 +50,16 @@ setClass("fibonacci_heap", contains = "heap")
 #' @param key.class  the primitive class type of the keys
 #'
 #' @return returns a new \code{fibonacci_heap} object
+#'
+#' @examples
+#'  # creates a fibonacci_heap<character, SEXP>
+#'  f_heap <- fibonacci_heap()
+#'
+#'  # creates a fibonacci_heap<numeric, SEXP>
+#'  f_heap <- fibonacci_heap("numeric")
+#'
+#'  # creates a fibonacci_heap<character, SEXP>
+#'  f_heap <- fibonacci_heap("character")
 #'
 fibonacci_heap <- function(
     key.class   = c("character", "numeric", "integer"))

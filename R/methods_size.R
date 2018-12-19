@@ -28,7 +28,25 @@
 #' @rdname size-methods
 #'
 #' @param obj  the object to get the size from
+#'
 #' @return  returns the size of \code{obj}
+#'
+#' @examples
+#'
+#'  # get the size of a hashmap
+#'  h_map <- hashmap()
+#'  h_map[letters] <- rnorm(length(letters))
+#'  size(h_map)
+#'
+#'  # get the size of a fibonacci heap
+#'  f_heap <- fibonacci_heap()
+#'  f_heap <- insert(f_heap, letters[seq(3)], list(1, diag(3), rnorm(2)))
+#'  size(f_heap)
+#'
+#'  # get the size of a stack
+#'  s <- stack()
+#'  s <- insert(s, list(1))
+#'  size(s)
 #'
 setGeneric(
     "size",

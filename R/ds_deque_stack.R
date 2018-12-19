@@ -32,6 +32,8 @@
 #'
 #' @slot .deque  \code{C++} object representing a deque
 #'
+#' @seealso  \code{\link{stack}} for creating a new \code{stack} object.
+#'
 setClass("stack", contains = "deque")
 
 
@@ -43,10 +45,21 @@ setClass("stack", contains = "deque")
 #' @description Instantiates a new \code{\linkS4class{stack}} object,
 #'  i.e. a list implementation with LIFO principle.
 #'
+#' @param ... parameters that are only needed if \code{utils::stack} should be
+#'  called
+#'
 #' @return returns a new \code{stack} object
 #'
-stack <- function()
+#' @examples
+#'  # creates a new stack<SEXP>
+#'  s <- stack()
+#'
+stack <- function(...)
 {
+    l <- list(...)
+    if (length(l))
+        return(utils::stack(...))
+
     stack <- methods::new(stack_sexp)
     methods::new("stack", .deque = stack)
 }
