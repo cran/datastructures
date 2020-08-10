@@ -1,7 +1,7 @@
 Package: datastructures
 Type: Package
 Title: Implementation of Core Data Structures
-Version: 0.2.8
+Version: 0.2.9
 Authors@R: person("Simon", "Dirmeier",
                   email = "simon.dirmeier@web.de",
                   role = c("aut", "cre"))
@@ -16,7 +16,7 @@ BugReports: https://github.com/dirmeier/datastructures/issues
 License: GPL-3
 Encoding: UTF-8
 Depends: R (>= 3.3), Rcpp
-Suggests: testthat, knitr, rmarkdown, lintr
+Suggests: testthat, knitr, styler, rmarkdown, lintr
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1
 SystemRequirements: C++11
@@ -32,7 +32,7 @@ Collate: 'checks.R' 'datastructures-package.R' 'methods_clear.R'
         'methods_keys.R' 'methods_at.R' 'ds_map_bimap.R'
         'ds_map_unordered.R' 'ds_map_hashmap.R' 'ds_map_multimap.R'
         'zzz.R'
-Packaged: 2018-12-19 01:15:12 UTC; simondi
+Packaged: 2020-08-07 18:10:36 UTC; simon
 Author: Simon Dirmeier [aut, cre]
 Repository: CRAN
-Date/Publication: 2018-12-19 13:00:03 UTC
+Date/Publication: 2020-08-10 11:20:02 UTC
